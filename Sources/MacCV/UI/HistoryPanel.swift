@@ -2,7 +2,6 @@ import SwiftUI
 
 struct HistoryPanel: View {
     @Bindable var viewModel: AppState
-    @State private var showClearConfirmation = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -39,7 +38,7 @@ struct HistoryPanel: View {
                 Spacer()
 
                 Button("Clear All") {
-                    showClearConfirmation = true
+                    confirmClearAll()
                 }
                 .buttonStyle(.plain)
                 .font(.system(size: 11))
@@ -59,16 +58,19 @@ struct HistoryPanel: View {
         }
         .frame(width: 320, height: 440)
         .background(Color(nsColor: .windowBackgroundColor))
-        .confirmationDialog(
-            "Clear all clipboard history?",
-            isPresented: $showClearConfirmation
-        ) {
-            Button("Clear All", role: .destructive) {
-                viewModel.clearAll()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This action cannot be undone. All copied items and images will be permanently deleted.")
+    }
+
+    private func confirmClearAll() {
+        NSApp.keyWindow?.close()
+        let alert = NSAlert()
+        alert.messageText = "Clear all clipboard history?"
+        alert.informativeText = "This action cannot be undone. All copied items and images will be permanently deleted."
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "Clear All")
+        alert.addButton(withTitle: "Cancel")
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn {
+            viewModel.clearAll()
         }
     }
 
